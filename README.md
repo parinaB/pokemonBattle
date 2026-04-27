@@ -1,6 +1,8 @@
 # Pokemon Battle Royale
 
-Premium animated Pokemon battle simulator with React + FastAPI and ML-based winner prediction.
+Premium animated Pokemon battle simulator with React + FastAPI and ML-based winner prediction. 
+Live at 
+`https://pokemonbattle-0jjl.onrender.com`  — powered by a Keras ML model with a React frontend and FastAPI backend, fully deployed on Render.
 
 ## Features
 - Premium dark UI with Framer Motion transitions and battle animations
@@ -114,7 +116,6 @@ Response (example):
 
 ### 1) Push to GitHub
 ```bash
-cd /Users/astitva/Desktop/pokemon2.0
 git init
 git add .
 git commit -m "Prepare Pokemon Battle Royale for deployment"
@@ -130,20 +131,21 @@ git push -u origin main
   - root: `backend`
   - build: `pip install -r requirements.txt`
   - start: `uvicorn app:app --host 0.0.0.0 --port $PORT`
-- Set `CORS_ORIGINS`:
-  - local/testing: `*`
-  - production: `https://<your-vercel-domain>`
+
 - After deploy, copy backend URL:
-  - `https://<your-render-service>.onrender.com`
+  - `https://pokemonbattle-s0nn.onrender.com`
 
-### 3) Deploy Frontend on Vercel
-- Import the same GitHub repo in Vercel.
-- Set project root directory to `frontend`.
-- Vercel config is provided in `frontend/vercel.json`.
+### 3) Deploy Frontend on Render
+- Go to Render → New → Static Site
+- Set root directory to `frontend`
+- Build command: `npm run build`
+- Publish directory: `dist`
 - Add environment variable:
-  - `VITE_API_URL=https://<your-render-service>.onrender.com`
-- Deploy.
+  - `VITE_API_URL=https://pokemonbattle-s0nn.onrender.com`
+- Deploy → Live at `https://pokemonbattle-0jjl.onrender.com`
 
-### 4) Verify Deployment
-  - Live at pokemonbattle-0jjl.onrender.com — powered by a Keras ML model with a React frontend and FastAPI backend,      fully deployed on Render.
-  - Open frontend Vercel URL and run both 1v1 and 6v6 battles.
+ 
+ ## Author
+Built by Parina — ML model, FastAPI backend, and React frontend.
+
+
