@@ -145,6 +145,5 @@ git push -u origin main
 - Deploy.
 
 ### 4) Verify Deployment
-- Check backend health:
-  - `https://<your-render-service>.onrender.com/health`
-- Open frontend Vercel URL and run both 1v1 and 6v6 battles.
+  - Live at pokemonbattle-0jjl.onrender.com — powered by a Keras ML model with a React frontend and FastAPI backend,      fully deployed on Render.
+  - Open frontend Vercel URL and run both 1v1 and 6v6 battles.
