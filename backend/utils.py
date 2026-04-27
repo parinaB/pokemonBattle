@@ -44,6 +44,7 @@ class Predictor:
       if not FEATURES_PATH.exists():
           raise FileNotFoundError("features.pkl not found. Expected features.pkl at workspace root.")
       self.feature_order = joblib.load(FEATURES_PATH)
+      self.classes = [str(c) for c in getattr(self.encoder, "classes_", [])]
       self.index_to_side = self._build_index_side_map()
 
     def _normalize_side_label(self, label: object) -> str | None:
@@ -55,17 +56,15 @@ class Predictor:
       return None
 
     def _build_index_side_map(self) -> dict[int, str]:
-      classes = getattr(self.encoder, "classes_", None)
-      if classes is None or len(classes) < 2:
+      classes = self.classes
+      if not classes:
           raise ValueError("label_encoder classes are invalid. Expected at least 2 classes.")
 
       mapped = {idx: self._normalize_side_label(label) for idx, label in enumerate(classes)}
+      # If encoder is not P1/P2-like (e.g., Pokemon types), leave empty and resolve in predict().
       if mapped.get(0) is None or mapped.get(1) is None:
-          raise ValueError(
-              f"Unable to map label_encoder classes to P1/P2: {list(classes)}. "
-              "Use labels 0/1 or P1/P2 in training targets."
-          )
-      return {0: mapped[0], 1: mapped[1]}
+          return {}
+      return {0: mapped.get(0, "P1"), 1: mapped.get(1, "P2")}
 
     def _type_id(self, pokemon: dict) -> float:
       ptype = pokemon.get("type", [])
@@ -105,7 +104,34 @@ class Predictor:
       mapped_from_index = self.index_to_side.get(winner_idx)
       if mapped_from_index:
           return mapped_from_index
-      raise ValueError(f"Unable to normalize predicted label: {label}")
+      return ""
+
+    def _side_from_type_probabilities(self, pokemon1: dict, pokemon2: dict, prediction: np.ndarray) -> tuple[str, float, float]:
+      if prediction.ndim == 2:
+          probs = prediction[0]
+      else:
+          probs = prediction
+      probs = np.asarray(probs, dtype=float).reshape(-1)
+      if probs.size != len(self.classes):
+          raise ValueError("Prediction/classes size mismatch for type-based label encoder.")
+
+      type1 = str((pokemon1.get("type") or [""])[0]).strip()
+      type2 = str((pokemon2.get("type") or [""])[0]).strip()
+      class_to_idx = {cls.lower(): idx for idx, cls in enumerate(self.classes)}
+      idx1 = class_to_idx.get(type1.lower())
+      idx2 = class_to_idx.get(type2.lower())
+      if idx1 is None or idx2 is None:
+          raise ValueError(f"Type label missing in encoder classes: type1={type1}, type2={type2}")
+
+      p1_raw = float(probs[idx1])
+      p2_raw = float(probs[idx2])
+      total = p1_raw + p2_raw
+      if total <= 0:
+          p1_prob, p2_prob = 0.5, 0.5
+      else:
+          p1_prob, p2_prob = p1_raw / total, p2_raw / total
+      winner = "P1" if p1_prob >= p2_prob else "P2"
+      return winner, p1_prob, p2_prob
 
     def predict(self, pokemon1: dict, pokemon2: dict) -> dict:
       feature_map = self._feature_map(pokemon1, pokemon2)
@@ -153,10 +179,9 @@ class Predictor:
       except Exception:
         label = winner_idx
 
-      normalized = self._normalize_label(
-          label,
-          winner_idx,
-      )
+      normalized = self._normalize_label(label, winner_idx)
+      if not normalized:
+          normalized, p1_prob, p2_prob = self._side_from_type_probabilities(pokemon1, pokemon2, prediction)
       confidence = p1_prob if normalized == "P1" else p2_prob
       return {
           "winner": normalized,
