@@ -1,15 +1,23 @@
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
+import os
 
 from utils import Predictor
 
 
 app = FastAPI(title="Pokemon Battle Predictor")
 
+cors_origins_raw = os.getenv("CORS_ORIGINS", "*")
+cors_origins = (
+    ["*"]
+    if cors_origins_raw.strip() == "*"
+    else [origin.strip() for origin in cors_origins_raw.split(",") if origin.strip()]
+)
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=cors_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

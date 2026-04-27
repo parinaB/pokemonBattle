@@ -109,3 +109,42 @@ Response (example):
 - Backend not connected: ensure FastAPI server is running on port `8000`.
 - Model load errors: verify all `.pkl` and `.keras` files exist at repository root.
 - Frontend API issues: restart both frontend and backend servers.
+
+## Deployment (Render + Vercel)
+
+### 1) Push to GitHub
+```bash
+cd /Users/astitva/Desktop/pokemon2.0
+git init
+git add .
+git commit -m "Prepare Pokemon Battle Royale for deployment"
+git branch -M main
+git remote add origin https://github.com/<your-username>/<your-repo>.git
+git push -u origin main
+```
+
+### 2) Deploy Backend on Render
+- Use the `render.yaml` in repo root.
+- Create a new Web Service from your GitHub repo on Render.
+- Render will auto-detect:
+  - root: `backend`
+  - build: `pip install -r requirements.txt`
+  - start: `uvicorn app:app --host 0.0.0.0 --port $PORT`
+- Set `CORS_ORIGINS`:
+  - local/testing: `*`
+  - production: `https://<your-vercel-domain>`
+- After deploy, copy backend URL:
+  - `https://<your-render-service>.onrender.com`
+
+### 3) Deploy Frontend on Vercel
+- Import the same GitHub repo in Vercel.
+- Set project root directory to `frontend`.
+- Vercel config is provided in `frontend/vercel.json`.
+- Add environment variable:
+  - `VITE_API_URL=https://<your-render-service>.onrender.com`
+- Deploy.
+
+### 4) Verify Deployment
+- Check backend health:
+  - `https://<your-render-service>.onrender.com/health`
+- Open frontend Vercel URL and run both 1v1 and 6v6 battles.
