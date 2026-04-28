@@ -141,6 +141,11 @@ git push -u origin main
 - Publish directory: `dist`
 - Add environment variable:
   - `VITE_API_URL=https://pokemonbattle-s0nn.onrender.com`
+- Live at
+    - `https://pokemonbattle-0jjl.onrender.com`
+
+
+-  (Ensure the backend is activated , before accessing the frontend)
 
 
  
