@@ -1,8 +1,7 @@
 # Pokemon Battle Royale
 
 Premium animated Pokemon battle simulator with React + FastAPI and ML-based winner prediction. 
-Live at 
-`https://pokemonbattle-0jjl.onrender.com`  — powered by a Keras ML model with a React frontend and FastAPI backend, fully deployed on Render.
+  — powered by a Keras ML model with a React frontend and FastAPI backend, fully deployed on Render.
 
 ## Features
 - Premium dark UI with Framer Motion transitions and battle animations
